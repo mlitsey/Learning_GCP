@@ -251,3 +251,122 @@ On the _Welcome to your new account_ screen, review the text, and click **Accept
 
 
 
+# Setting Cloud Storage Lifecycle Rules
+
+While saving an object in a Cloud Storage bucket is relatively inexpensive, there is, nonetheless, a cost. The cost varies depending on the storage class selected. Certain objects are required to be more available at first, requiring the storage class with the highest availability — and cost. Such objects may eventually be relegated to less available and less expense storage classes and even be deleted. Management of these objects over time can be handled automatically by establishing and implementing lifecycle rules. In this hands-on lab, you’ll see how to set a variety of lifecycle rules for Google Cloud Storage buckets, both from the console and the command line, as well as see how to place an object on hold so it stays in place regardless of the rules.
+
+## Solution
+
+### Create and Populate the Storage Bucket
+
+#### Create the Bucket
+
+1. From the Google Cloud console main navigation (hamburger menu on the top left), select **Cloud Storage**.
+2. Click **CREATE BUCKET**.
+3. Enter a globally unique name for your bucket (e.g., `acg-lifecycle-` with some numbers appended to the end), and click **CONTINUE**. (Remember this name for use later in the lab.)
+4. For **Location Type**, select **Region**, use the default region (i.e., **us-east1**), and click **CONTINUE**.
+5. For the **default storage class**, select **Standard** and click **CONTINUE**.
+6. Click **CREATE**.
+
+#### Add the Files
+
+1. Click the icon for the Cloud Shell (on the top right of the screen, next to the search box).
+    
+2. Click **CONTINUE**.
+    
+3. Click the project name on the top left of the screen (next to the Google Cloud logo), and in the **Select a project** pop-up, copy the **ID**.
+    
+4. Close the pop-up, and set the project within the Cloud Shell. Replace `<PROJECT_ID>` with the ID you just copied:
+    
+    `gcloud config set project <PROJECT_ID>`
+    
+5. When prompted, click **AUTHORIZE**.
+    
+6. Clone the course repo:
+    
+    `git clone https://github.com/linuxacademy/content-gc-essentials`
+    
+7. Change to the lab's directory:
+    
+    `cd content-gc-essentials/cloud-storage-lifecycle-lab`
+    
+8. Review the files within the directory:
+    
+    `ls`
+    
+    Observe the directory includes a few `.jpeg` files as well as a `.json` file, which you'll use for setting some rules.
+    
+9. Copy the files to the storage bucket. Replace `<BUCKET_NAME>` with the name you created before:
+    
+    `gsutil cp * gs://<BUCKET_NAME>`
+    
+10. On the top right of the main console (still on the **Bucket details** page), click **REFRESH** to see the files now available within the bucket.
+    
+
+### Create Lifecycle Storage Rules via the Console
+
+Using the console, create the following rules.
+
+#### Nearline Rule
+
+1. From the **Bucket details** page, select the **LIFECYCLE** tab.
+2. Click **ADD A RULE**.
+3. Under **Select an action**, ensure **Set storage class to Nearline** is selected.
+4. Click **CONTINUE**.
+5. Under **Select object conditions**, select **Age** and enter _30_ in the text box that is displayed.
+6. Click **CONTINUE**.
+7. Click **CREATE**.
+
+#### Coldline Rule
+
+1. Click **ADD A RULE**.
+2. Under **Select an action**, select **Set storage class to Coldline**.
+3. Click **CONTINUE**.
+4. Under **Select object conditions**, select **Age** and enter _90_ in the text box that is displayed.
+5. Click **CREATE**.
+
+#### Archive Rule
+
+1. Click **ADD A RULE**.
+2. Under **Select an action**, select **Set storage class to Archive**.
+3. Click **CONTINUE**.
+4. Under **Select object conditions**, select **Age** and enter _365_ in the text box that is displayed.
+5. Click **CREATE**.
+
+### Update Lifecycle Rules via the CLI
+
+1. For the final rule, go back to the Cloud Shell terminal.
+    
+2. Click **Open Editor** (above the code entry area) to launch the Cloud Shell Editor.
+    
+    > **Note**: Depending on your browser, a message may be displayed indicating that you need to open the Editor in a new window. In this case, click **Open in a new window**.
+    
+    > **Troubleshooting Tip**: If you're using Google Chrome and receive an error message stating **We can't load the code editor here because third-party cookies are disabled**, follow these steps to enable third-party cookies:
+    > 
+    > 1. In the address bar, click the eye icon.
+    > 2. Click **Site not working?**
+    > 3. Click **Allow cookies**, and reload the page.
+    > 4. Click **Open Editor** again.
+    
+3. From the file navigation on the left, navigate through the directory structure to `content-gc-essentials` > `cloud-storage-lifecycle-lab`, and select the `delete-after-two-years.json` file to review it. Observe the final rule that will be added. The actions within the file will override the existing lifecycle rules.
+    
+4. If you opened a new window, go back to the previous Cloud Shell window, and click **Open Terminal** on the bottom. If you opened Cloud Editor within the same window, click **Open Terminal**, and drag the terminal view down so you can also see the main console.
+    
+5. Set the lifecycle rules using the JSON file (replace `<BUCKET_NAME>` with the bucket your previously created):
+    
+    `gsutil lifecycle set delete-after-two-years.json gs://<BUCKET_NAME>`
+    
+6. Back in the console (still within the **LIFECYCLE** tab of the **Bucket details** page), click **REFRESH**. Confirm the new **Delete object** lifecycle rule has been added in the console.
+    
+
+### Place an Item on Hold
+
+1. Select the **OBJECTS** tab.
+2. Select the checkbox for the `hold-this-image.jpeg` object.
+3. Above the file list, click **MANAGE HOLDS**.
+4. Select **Event-based hold**.
+5. Click **SAVE HOLD SETTINGS**. Observe the object now has a different **Retention expiration date** of **Determined upon hold removal**.
+
+
+
+
